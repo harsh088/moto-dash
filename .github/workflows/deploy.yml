@@ -25,7 +25,14 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - name: Install dependencies
+        # On failure, surface npm's error lines as a workflow annotation (readable without the full log).
+        run: |
+          npm ci --no-audit --no-fund > npm-ci.log 2>&1 || {
+            echo "::error title=npm ci failed::$(grep -iE 'npm (error|err)' npm-ci.log | head -25 | tr '\n' ' ')"
+            cat npm-ci.log
+            exit 1
+          }
       - run: npm run build
         env:
           VITE_TOMTOM_API_KEY: ${{ secrets.VITE_TOMTOM_API_KEY }}
