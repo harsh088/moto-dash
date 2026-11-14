@@ -1,0 +1,70 @@
+# Builds an UNSIGNED iPhone app (.ipa) on a free GitHub macOS runner.
+# Install it with Sideloadly on Windows, which signs it with your free Apple ID (valid 7 days).
+# Download: Actions tab -> latest "Build iPhone app" run -> Artifacts -> MotoDash-ipa.
+name: Build iPhone app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    # Capacitor 8 needs Xcode 26+, the default on the macos-26 image.
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build web app
+        run: npm run build
+        env:
+          VITE_TOMTOM_API_KEY: ${{ secrets.VITE_TOMTOM_API_KEY }}
+
+      - name: Copy web app + plugins into the iOS project
+        run: npx cap sync ios
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build unsigned app
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package .ipa
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qry MotoDash.ipa Payload
+          ls -lh MotoDash.ipa
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MotoDash-ipa
+          path: MotoDash.ipa
+          retention-days: 30
