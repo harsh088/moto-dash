@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_TOMTOM_API_KEY?: string
+  readonly VITE_SPOTIFY_CLIENT_ID?: string
 }
 
 interface ImportMeta {

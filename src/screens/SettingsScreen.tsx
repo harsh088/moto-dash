@@ -6,6 +6,7 @@ import { clearRecents } from '../lib/places'
 import { clearSearchCache } from '../lib/search'
 import { type ThemeMode, updateSettings, useSettings } from '../lib/settings'
 import { USAGE_LIMITS, WARN_AT, clearTomTomBlock, resetUsage, usedFor, useUsage } from '../lib/usage'
+import { NATIVE_REDIRECT, connectSpotify, disconnectSpotify, setSpotifyClientId, useSpotify, webRedirect } from '../lib/spotify'
 import { say, unlockAudio, useEnglishVoices } from '../lib/voice'
 import { type ProviderState, TOMTOM_KEY, setSessionFallback } from '../map/provider'
 
@@ -35,6 +36,7 @@ export default function SettingsScreen({ provider, night }: { provider: Provider
   const settings = useSettings()
   const usage = useUsage()
   const voices = useEnglishVoices()
+  const spotify = useSpotify()
 
   const retryTomTom = () => {
     clearTomTomBlock()
@@ -138,6 +140,36 @@ export default function SettingsScreen({ provider, night }: { provider: Provider
           </button>
         </section>
       )}
+
+      <section className="card">
+        <h2>Spotify</h2>
+        <p className="muted">
+          Needs Spotify Premium and a free app at developer.spotify.com (one time). Add this Redirect URI there:
+        </p>
+        <code className="code-line">{isNative ? NATIVE_REDIRECT : webRedirect()}</code>
+        <label className="field">
+          <span>Client ID</span>
+          <input
+            className="text-input"
+            value={spotify.clientId}
+            onChange={(e) => setSpotifyClientId(e.target.value)}
+            placeholder="Paste the Client ID from the Spotify dashboard"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+        </label>
+        {spotify.error && <p className="error">{spotify.error}</p>}
+        {spotify.tokens ? (
+          <button type="button" className="btn" onClick={disconnectSpotify}>
+            Disconnect Spotify
+          </button>
+        ) : (
+          <button type="button" className="btn primary" onClick={() => void connectSpotify()} disabled={!spotify.clientId}>
+            Connect Spotify
+          </button>
+        )}
+      </section>
 
       <section className="card">
         <h2>Map provider</h2>

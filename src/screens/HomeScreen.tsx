@@ -1,37 +1,48 @@
-import { NextTurnCard, SpeedCard, UsageBanner } from '../components/Cards'
 import Icon, { type IconName } from '../components/Icon'
-import { useLocation } from '../lib/location'
+import { openSpotifyApp } from '../lib/links'
+import { UsageBanner } from '../components/Cards'
 import { useNav } from '../lib/nav'
 import type { Screen } from '../lib/route'
 
+interface AppTile {
+  label: string
+  icon: IconName
+  tone: string
+  screen?: Screen
+  action?: () => void
+}
+
+/** CarPlay-style home: a grid of big rounded app icons. */
 export default function HomeScreen({ go }: { go: (s: Screen) => void }) {
-  const loc = useLocation()
   const nav = useNav()
-  const riding = nav.status === 'riding'
-  const tiles: { screen: Screen; label: string; icon: IconName; primary?: boolean }[] = [
-    riding
-      ? { screen: 'dash', label: 'Dashboard', icon: 'dash', primary: true }
-      : { screen: 'nav', label: 'Navigate', icon: 'navigate', primary: true },
-    { screen: 'music', label: 'Music', icon: 'music' },
-    { screen: 'phone', label: 'Phone', icon: 'phone' },
+  const apps: AppTile[] = [
+    { label: 'Dashboard', icon: 'dash', tone: 'tone-accent', screen: 'dash' },
+    { label: 'Maps', icon: 'navigate', tone: 'tone-maps', screen: 'nav' },
+    { label: 'Music', icon: 'music', tone: 'tone-music', screen: 'music' },
+    { label: 'Phone', icon: 'phone', tone: 'tone-phone', screen: 'phone' },
+    { label: 'Spotify', icon: 'play', tone: 'tone-spotify', action: openSpotifyApp },
+    { label: 'Settings', icon: 'settings', tone: 'tone-plain', screen: 'settings' },
   ]
   return (
-    <div className="screen home">
+    <div className="screen home-grid-screen">
       <UsageBanner />
-      <div className="home-top">
-        <SpeedCard loc={loc} />
-        {riding && nav.nextTurn && <NextTurnCard turn={nav.nextTurn} size="mini" />}
-      </div>
-      <div className="tiles">
-        {tiles.map((t) => (
+      {nav.status === 'riding' && (
+        <button type="button" className="banner info ride-pill" onClick={() => go('dash')}>
+          Ride in progress: tap to return to the Dashboard
+        </button>
+      )}
+      <div className="app-grid">
+        {apps.map((a) => (
           <button
-            key={t.screen}
+            key={a.label}
             type="button"
-            className={`tile${t.primary ? ' primary' : ''}`}
-            onClick={() => go(t.screen)}
+            className="app-launch"
+            onClick={() => (a.screen ? go(a.screen) : a.action?.())}
           >
-            <Icon name={t.icon} size={48} />
-            <span>{t.label}</span>
+            <span className={`app-icon ${a.tone}`}>
+              <Icon name={a.icon} size={46} />
+            </span>
+            <span className="app-name">{a.label}</span>
           </button>
         ))}
       </div>

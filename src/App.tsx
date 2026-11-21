@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import './features.css'
-import BottomBar from './components/BottomBar'
+import './carplay.css'
+import Dock from './components/Dock'
 import { useIsNight } from './lib/daynight'
 import { startLocationWatch, useLocation } from './lib/location'
 import { endRide, selectRoute, useNav } from './lib/nav'
@@ -9,6 +10,7 @@ import { reverseGeocode } from './lib/search'
 import { startRideEngine } from './lib/rideEngine'
 import { useScreen } from './lib/route'
 import { useSettings } from './lib/settings'
+import { initSpotifyRedirects, startSpotifyPolling } from './lib/spotify'
 import MapView, { type CameraMode, type MapMarker } from './map/MapView'
 import { useMapProvider } from './map/provider'
 import DashScreen from './screens/DashScreen'
@@ -32,6 +34,11 @@ export default function App() {
   useEffect(() => {
     startRideEngine()
     return startLocationWatch()
+  }, [])
+
+  useEffect(() => {
+    void initSpotifyRedirects()
+    return startSpotifyPolling()
   }, [])
 
   // New route options: stop following so the route overview stays visible.
@@ -118,7 +125,7 @@ export default function App() {
         {screen === 'phone' && <PhoneScreen />}
         {screen === 'settings' && <SettingsScreen provider={provider} night={night} />}
       </main>
-      <BottomBar current={screen} onSelect={go} riding={riding} />
+      <Dock current={screen} onSelect={go} />
     </div>
   )
 }

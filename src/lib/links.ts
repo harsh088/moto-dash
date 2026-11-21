@@ -40,3 +40,8 @@ export const MUSIC_APPS = [
   // music:// is the Apple Music app scheme on iOS (not formally documented); web fallback is music.apple.com.
   { id: 'apple', label: 'Apple Music', app: 'music://', web: 'https://music.apple.com/' },
 ] as const
+
+export function openSpotifyApp(): void {
+  const a = MUSIC_APPS[0]
+  openApp(a.app, a.web)
+}

@@ -77,6 +77,21 @@
 		<string>location</string>
 		<string>audio</string>
 	</array>
+	<!-- Read contacts for the Phone screen (names + numbers only, stays on the phone). -->
+	<key>NSContactsUsageDescription</key>
+	<string>Moto Dash shows your contacts on its Phone screen so you can call them with big buttons while riding.</string>
+	<!-- motodash://callback: Spotify sends you back here after logging in. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.motodash.rider</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>motodash</string>
+			</array>
+		</dict>
+	</array>
 	<!-- Allow opening the Spotify / Apple Music / Google Maps apps. -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

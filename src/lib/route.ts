@@ -5,7 +5,8 @@ const SCREENS: Screen[] = ['home', 'nav', 'dash', 'music', 'phone', 'settings']
 
 function read(): Screen {
   const s = location.hash.replace(/^#\/?/, '') as Screen
-  return SCREENS.includes(s) ? s : 'home'
+  // Like CarPlay, open on the Dashboard.
+  return SCREENS.includes(s) ? s : 'dash'
 }
 
 /** Minimal hash routing (#/home, #/nav, ...): works on GitHub Pages and in Capacitor. */
